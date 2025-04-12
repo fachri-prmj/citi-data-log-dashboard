@@ -4,15 +4,15 @@ import numpy as np
 import plotly.express as px
 from datetime import datetime
 
-# ✅ HARUS PALING ATAS!
+# above the lone
 st.set_page_config(
     page_title="Citi Group Data Governance Dashboard",
     page_icon="favicon.ico",
     layout="wide"
 )
 
-# Judul dan intro
-st.markdown("## 📊 Citi Group Data Quality Dashboard")
+# intro and title
+st.markdown("## favicon.ico Citi Group Data Quality Dashboard")
 st.markdown("*Simulation of data governance framework and rule monitoring for financial domain.*")
 st.markdown("---")
 
