@@ -1,0 +1,30 @@
+name: Seed Loop Cron
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Setiap hari jam 00:00 UTC
+  workflow_dispatch:     # Bisa dijalankan manual juga
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run seeder
+        env:
+          SUPABASE_URL: ${{https://pctloeagimccglmzkstg.supabase.co}}
+          SUPABASE_KEY: ${{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjdGxvZWFnaW1jY2dsbXprc3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ0NDA3NDgsImV4cCI6MjA2MDAxNjc0OH0.TIVfl0q3JLdhnUrNuMfSsyoF3Nli-dK7nNd6SeqdB5Y}}
+        run: |
+          python seed_loop.py
