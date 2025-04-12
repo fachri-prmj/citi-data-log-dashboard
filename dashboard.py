@@ -1,3 +1,14 @@
+from supabase import create_client, Client
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Connect to Supabase
+url = os.getenv("SUPABASE_URL")
+key = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 
 import streamlit as st
 import pandas as pd
@@ -20,42 +31,17 @@ with col2:
     st.markdown("*Simulation of data governance framework and rule monitoring for financial domain.*")
     st.markdown("---")
 
-# Dummy data
-domains = ['loan', 'customer', 'risk', 'investment', 'kyc']
-rules = [
-    'Loan Amount > 0',
-    'Valid Transaction Date',
-    'Interest Rate in 0-100',
-    'Valid National ID',
-    'Valid Email Format'
-]
+#Dummy data changed to real
+# Get data from Supabase
+response = supabase.table("dq_log").select("*").execute()
+data = response.data
 
-np.random.seed(42)
-data = []
-
-for i in range(10):
-    run_date = datetime(2025, 4, 1) + pd.Timedelta(days=i * 2)
-    for domain in domains:
-        for rule in rules:
-            total = np.random.randint(4000, 6000)
-            failed = np.random.randint(0, 300)
-            accuracy = round(100 * (total - failed) / total, 2)
-            status = (
-                'PASS' if accuracy >= 95 else
-                'WARN' if accuracy >= 92.5 else
-                'FAIL'
-            )
-            data.append({
-                'run_date': run_date,
-                'data_domain': domain,
-                'rule_name': rule,
-                'total_records': total,
-                'failed_records': failed,
-                'accuracy_pct': accuracy,
-                'status_flag': status
-            })
-
+# Convert to DataFrame
 df = pd.DataFrame(data)
+
+# Convert run_date to datetime if needed
+df["run_date"] = pd.to_datetime(df["run_date"])
+
 
 # Optional: Export CSV untuk Tableau
 df.to_csv("dq_log_simulated.csv", index=False)
