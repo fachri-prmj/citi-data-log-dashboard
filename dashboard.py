@@ -105,3 +105,22 @@ def color_status(val):
 st.markdown("### 🧾 Validation Rule Details")
 styled_df = selected_df.style.applymap(color_status, subset=['status_flag'])
 st.dataframe(styled_df, use_container_width=True)
+
+# Run once to insert dummy data into Supabase
+def seed_supabase_with_dummy_data():
+    domains = ['loan', 'customer', 'risk', 'investment', 'kyc']
+    np.random.seed(42)
+    for i in range(10):
+        run_date = datetime(2025, 4, 1) + pd.Timedelta(days=i * 2)
+        for domain in domains:
+            total = np.random.randint(4000, 6000)
+            failed = np.random.randint(0, 300)
+            accuracy = round(100 * (total - failed) / total, 2)
+
+            supabase.table("dq_log").insert({
+                "run_date": run_date.isoformat(),
+                "domain": domain,
+                "accuracy_pct": accuracy,
+                "rules_checked": total,
+                "failed_rules": failed
+            }).execute()
