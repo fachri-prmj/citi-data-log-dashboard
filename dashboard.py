@@ -4,12 +4,13 @@ import numpy as np
 import plotly.express as px
 from datetime import datetime
 
-# above the lone
+# above the line
 st.set_page_config(
     page_title="Citi Group Data Governance Dashboard",
     page_icon="favicon.ico",
-    layout=""
+    layout="full"
 )
+
 
 # intro and title
 st.image("favicon.ico", width=80)
