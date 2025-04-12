@@ -1,23 +1,26 @@
+from supabase import create_client
+from dotenv import load_dotenv
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
 from datetime import datetime
-from supabase import create_client
 
-# Supabase config from Streamlit Secrets
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+# Load .env
+load_dotenv()
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Page setup
+# Streamlit Page Setup
 st.set_page_config(
     page_title="Citi Group Data Governance Dashboard",
     page_icon="favicon.ico",
-    layout="centered"
+    layout="wide"
 )
 
-# HEADER & LOGO CENTERED
+# Header Centered
 col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.image("favicon.ico", width=60)
@@ -25,17 +28,23 @@ with col2:
     st.markdown("*Simulation of data governance framework and rule monitoring for financial domain.*")
     st.markdown("---")
 
-# Fetch from Supabase
-response = supabase.table("dq_log").select("*").execute()
-df = pd.DataFrame(response.data)
+# Load Data with cache timeout (fresh every 60s)
+@st.cache_data(ttl=60)
+def load_data():
+    response = supabase.table("dq_log").select("*").execute()
+    return pd.DataFrame(response.data)
+
+df = load_data()
+
+# Format date
 df["run_date"] = pd.to_datetime(df["run_date"])
 
-# Sidebar filter
+# Sidebar Filters
 st.sidebar.title("🔎 Filters")
 selected_run = st.sidebar.selectbox("Select Run Date", sorted(df["run_date"].unique(), reverse=True))
 selected_df = df[df["run_date"] == selected_run]
 
-# KPI cards
+# KPI Cards
 avg_accuracy = selected_df["accuracy_pct"].mean()
 failed_rules = selected_df["failed_rules"].sum()
 total_rules = selected_df["rules_checked"].sum()
@@ -50,7 +59,7 @@ with col3:
 
 st.markdown("---")
 
-# Accuracy by domain
+# Accuracy by Domain
 domain_acc = selected_df.groupby("domain")["accuracy_pct"].mean().reset_index()
 fig_bar = px.bar(
     domain_acc,
@@ -63,7 +72,7 @@ fig_bar = px.bar(
 fig_bar.add_hline(y=95, line_dash="dot", line_color="red")
 st.plotly_chart(fig_bar, use_container_width=True)
 
-# Trend over time
+# Trend Over Time
 trend = df.groupby(["run_date", "domain"])["accuracy_pct"].mean().reset_index()
 fig_line = px.line(
     trend,
@@ -76,7 +85,7 @@ fig_line = px.line(
 fig_line.add_hline(y=95, line_dash="dot", line_color="red")
 st.plotly_chart(fig_line, use_container_width=True)
 
-# Table with conditional formatting
+# Conditional Table
 def color_status(row):
     acc = row["accuracy_pct"]
     if acc >= 95:
