@@ -1,18 +1,14 @@
-from supabase import create_client, Client
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-url = os.getenv("SUPABASE_URL")
-key = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
 from datetime import datetime
+from supabase import create_client
+
+# Supabase config from Streamlit Secrets
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Page setup
 st.set_page_config(
@@ -32,8 +28,6 @@ with col2:
 # Fetch from Supabase
 response = supabase.table("dq_log").select("*").execute()
 df = pd.DataFrame(response.data)
-
-# Make sure date format is correct
 df["run_date"] = pd.to_datetime(df["run_date"])
 
 # Sidebar filter
@@ -95,25 +89,3 @@ def color_status(row):
 styled_df = selected_df.style.apply(color_status, axis=1)
 st.markdown("### 🧾 Validation Rule Details")
 st.dataframe(styled_df, use_container_width=True)
-
-# OPTIONAL: Seed data once (run only if needed)
-def seed_supabase_with_dummy_data():
-    domains = ['loan', 'customer', 'risk', 'investment', 'kyc']
-    np.random.seed(42)
-    for i in range(10):
-        run_date = datetime(2025, 4, 1) + pd.Timedelta(days=i * 2)
-        for domain in domains:
-            total = np.random.randint(4000, 6000)
-            failed = np.random.randint(0, 300)
-            accuracy = round(100 * (total - failed) / total, 2)
-
-            supabase.table("dq_log").insert({
-                "run_date": run_date.isoformat(),
-                "domain": domain,
-                "accuracy_pct": accuracy,
-                "rules_checked": total,
-                "failed_rules": failed
-            }).execute()
-
-# Uncomment this only once if you want to populate dummy data:
-# seed_supabase_with_dummy_data()
