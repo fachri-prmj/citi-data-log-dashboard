@@ -8,11 +8,12 @@ from datetime import datetime
 st.set_page_config(
     page_title="Citi Group Data Governance Dashboard",
     page_icon="favicon.ico",
-    layout="wide"
+    layout=""
 )
 
 # intro and title
-st.markdown("## favicon.ico Citi Group Data Quality Dashboard")
+st.image("favicon.ico", width=80)
+st.markdown("## Citi Group Data Quality Dashboard")
 st.markdown("*Simulation of data governance framework and rule monitoring for financial domain.*")
 st.markdown("---")
 
