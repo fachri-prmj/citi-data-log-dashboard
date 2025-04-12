@@ -23,8 +23,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run seeder
+        run: |
+          python seed_loop.py
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-        run: |
-          python seed_loop.py
