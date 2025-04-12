@@ -8,7 +8,7 @@ from datetime import datetime
 st.set_page_config(
     page_title="Citi Group Data Governance Dashboard",
     page_icon="favicon.ico",
-    layout="full"
+    layout="wide"
 )
 
 
