@@ -29,13 +29,15 @@ with col2:
     st.markdown("---")
 
 # Load Data with cache timeout (fresh every 60s)
-@st.cache_data(ttl=60)
+# Manual refresh
+if st.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+
 def load_data():
     response = supabase.table("dq_log").select("*").execute()
     return pd.DataFrame(response.data)
 
 df = load_data()
-
 # Format date
 df["run_date"] = pd.to_datetime(df["run_date"])
 
