@@ -1,9 +1,9 @@
-name: Seed Loop
+name: Seed Loop Cron
 
 on:
   schedule:
     - cron: "0 0 * * *"  # every day 00:00 UTC
-  workflow_dispatch:     # can run manually
+  workflow_dispatch:
 
 jobs:
   seed:
