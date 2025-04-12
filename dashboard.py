@@ -98,5 +98,5 @@ def color_status(row):
         return ['background-color: #f8d7da; color: #721c24'] * len(row)
 
 styled_df = selected_df.style.apply(color_status, axis=1)
-st.markdown("### 🧾 Validation Rule Details")
+st.markdown("###Validation Rule Details")
 st.dataframe(styled_df, use_container_width=True)
