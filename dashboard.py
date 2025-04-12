@@ -5,12 +5,11 @@ import plotly.express as px
 from datetime import datetime
 
 # above the line
-col1, col2, col3 = st.columns([1, 4, 1])
-with col2:
-    st.markdown("## Citi Group Data Quality Dashboard")
-    st.plotly_chart(fig)
-
-
+st.set_page_config(
+    page_title="Citi Group Data Governance Dashboard",
+    page_icon="favicon.ico",
+    layout="centered"
+)
 
 # intro and title
 st.image("favicon.ico", width=80)
