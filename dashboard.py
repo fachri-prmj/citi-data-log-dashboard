@@ -7,7 +7,7 @@ from datetime import datetime
 # ✅ HARUS PALING ATAS!
 st.set_page_config(
     page_title="Citi Group Data Governance Dashboard",
-    page_icon="📊",
+    page_icon="favicon.ico",
     layout="wide"
 )
 
