@@ -24,7 +24,8 @@ jobs:
 
       - name: Run seeder
         env:
-          SUPABASE_URL: ${{https://pctloeagimccglmzkstg.supabase.co}}
-          SUPABASE_KEY: ${{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjdGxvZWFnaW1jY2dsbXprc3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ0NDA3NDgsImV4cCI6MjA2MDAxNjc0OH0.TIVfl0q3JLdhnUrNuMfSsyoF3Nli-dK7nNd6SeqdB5Y}}
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
         run: |
           python seed_loop.py
