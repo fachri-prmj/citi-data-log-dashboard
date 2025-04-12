@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
-
-# Connect to Supabase
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
@@ -20,31 +18,23 @@ from datetime import datetime
 st.set_page_config(
     page_title="Citi Group Data Governance Dashboard",
     page_icon="favicon.ico",
-    layout="wide"
+    layout="centered"
 )
 
-# HEADER & LOGO CENTERED (inside column)
-col1, col2, col3 = st.columns([1, 6, 1])  # center col2
+# HEADER & LOGO CENTERED
+col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.image("favicon.ico", width=60)
     st.markdown("## **Citi Group Data Quality Dashboard**")
     st.markdown("*Simulation of data governance framework and rule monitoring for financial domain.*")
     st.markdown("---")
 
-#Dummy data changed to real
-# Get data from Supabase
+# Fetch from Supabase
 response = supabase.table("dq_log").select("*").execute()
-data = response.data
+df = pd.DataFrame(response.data)
 
-# Convert to DataFrame
-df = pd.DataFrame(data)
-
-# Convert run_date to datetime if needed
+# Make sure date format is correct
 df["run_date"] = pd.to_datetime(df["run_date"])
-
-
-# Optional: Export CSV untuk Tableau
-df.to_csv("dq_log_simulated.csv", index=False)
 
 # Sidebar filter
 st.sidebar.title("🔎 Filters")
@@ -53,8 +43,8 @@ selected_df = df[df["run_date"] == selected_run]
 
 # KPI cards
 avg_accuracy = selected_df["accuracy_pct"].mean()
-failed_rules = selected_df[selected_df["status_flag"] == "FAIL"].shape[0]
-total_rules = selected_df.shape[0]
+failed_rules = selected_df["failed_rules"].sum()
+total_rules = selected_df["rules_checked"].sum()
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -66,11 +56,11 @@ with col3:
 
 st.markdown("---")
 
-# Bar chart per domain
-domain_acc = selected_df.groupby("data_domain")["accuracy_pct"].mean().reset_index()
+# Accuracy by domain
+domain_acc = selected_df.groupby("domain")["accuracy_pct"].mean().reset_index()
 fig_bar = px.bar(
     domain_acc,
-    x="data_domain",
+    x="domain",
     y="accuracy_pct",
     color="accuracy_pct",
     color_continuous_scale="Blues",
@@ -79,34 +69,34 @@ fig_bar = px.bar(
 fig_bar.add_hline(y=95, line_dash="dot", line_color="red")
 st.plotly_chart(fig_bar, use_container_width=True)
 
-# Line chart trend
-trend = df.groupby(["run_date", "data_domain"])["accuracy_pct"].mean().reset_index()
+# Trend over time
+trend = df.groupby(["run_date", "domain"])["accuracy_pct"].mean().reset_index()
 fig_line = px.line(
     trend,
     x="run_date",
     y="accuracy_pct",
-    color="data_domain",
+    color="domain",
     markers=True,
     title="Accuracy Trend Over Time"
 )
 fig_line.add_hline(y=95, line_dash="dot", line_color="red")
 st.plotly_chart(fig_line, use_container_width=True)
 
-# Table with color status
-def color_status(val):
-    if val == 'PASS':
-        return 'background-color: #d4edda; color: #155724'
-    elif val == 'WARN':
-        return 'background-color: #fff3cd; color: #856404'
-    elif val == 'FAIL':
-        return 'background-color: #f8d7da; color: #721c24'
-    return ''
+# Table with conditional formatting
+def color_status(row):
+    acc = row["accuracy_pct"]
+    if acc >= 95:
+        return ['background-color: #d4edda; color: #155724'] * len(row)
+    elif acc >= 92.5:
+        return ['background-color: #fff3cd; color: #856404'] * len(row)
+    else:
+        return ['background-color: #f8d7da; color: #721c24'] * len(row)
 
+styled_df = selected_df.style.apply(color_status, axis=1)
 st.markdown("### 🧾 Validation Rule Details")
-styled_df = selected_df.style.applymap(color_status, subset=['status_flag'])
 st.dataframe(styled_df, use_container_width=True)
 
-# Run once to insert dummy data into Supabase
+# OPTIONAL: Seed data once (run only if needed)
 def seed_supabase_with_dummy_data():
     domains = ['loan', 'customer', 'risk', 'investment', 'kyc']
     np.random.seed(42)
@@ -124,3 +114,6 @@ def seed_supabase_with_dummy_data():
                 "rules_checked": total,
                 "failed_rules": failed
             }).execute()
+
+# Uncomment this only once if you want to populate dummy data:
+# seed_supabase_with_dummy_data()
